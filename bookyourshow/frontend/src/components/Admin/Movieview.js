@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../Admin/Navbar";
 import axios from "axios";
-import '../Admin/Movieview.css';
+import "../Admin/Movieview.css";
 import { Link } from "react-router-dom";
 
 const Movieview = () => {
@@ -11,6 +11,7 @@ const Movieview = () => {
 
   const fetchData = async () => {
     try {
+      // Clear localStorage keys related to movie details
       localStorage.setItem("id", "");
       localStorage.setItem("Movie Name", "");
       localStorage.setItem("movie Genre", "");
@@ -21,9 +22,12 @@ const Movieview = () => {
       localStorage.setItem("movie Releasedate", "");
       localStorage.setItem("movie Trailer", "");
       localStorage.setItem("movie Format", "");
-      const response = await axios("http://localhost:5000/movieview");
+      localStorage.setItem("moviereviews", ""); // Clear existing reviews if any
+
+      // Fetch movies from backend
+      const response = await axios.get("http://localhost:5000/movieview");
       setData(response.data);
-      console.log(response.data);
+      console.log("Fetched movies:", response.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -52,7 +56,10 @@ const Movieview = () => {
     }
   }, []);
 
-  // Updated setID function to include movieFormat
+  /**
+   * Store movie details (including reviews) in localStorage
+   * so the details page can retrieve them.
+   */
   function setID(
     _id,
     movieName,
@@ -63,9 +70,10 @@ const Movieview = () => {
     movieDescription,
     movieReleasedate,
     trailerLink,
-    movieFormat
+    movieFormat,
+    reviews
   ) {
-    console.log("movieview", _id);
+    console.log("Selected movie ID:", _id);
     localStorage.setItem("id", _id);
     localStorage.setItem("moviename", movieName);
     localStorage.setItem("moviegenre", movieGenre);
@@ -76,16 +84,16 @@ const Movieview = () => {
     localStorage.setItem("moviereleasedate", movieReleasedate);
     localStorage.setItem("movietrailer", trailerLink);
     localStorage.setItem("movieformat", movieFormat);
+    // Store reviews as a JSON string
+    localStorage.setItem("moviereviews", JSON.stringify(reviews));
   }
 
   async function deleted(id) {
     try {
       const response = await axios.delete(`http://localhost:5000/movieview/delete/${id}`);
-      console.log(response);
+      console.log("Delete response:", response);
     } catch (err) {
-      console.log("error");
-      console.log("Data", err.response.data.message);
-      console.log("Status", err.response.status);
+      console.error("Error deleting movie:", err);
     }
     fetchData();
   }
@@ -155,6 +163,7 @@ const Movieview = () => {
                 <td>{item.movieReleasedate}</td>
                 <td>{item.trailerLink}</td>
                 <td>{item.movieFormat}</td>
+                
                 <td>
                   <Link to="/editmovie">
                     <button
@@ -170,7 +179,8 @@ const Movieview = () => {
                           item.movieDescription,
                           item.movieReleasedate,
                           item.trailerLink,
-                          item.movieFormat
+                          item.movieFormat,
+                          item.reviews // pass reviews as well
                         )
                       }
                     >

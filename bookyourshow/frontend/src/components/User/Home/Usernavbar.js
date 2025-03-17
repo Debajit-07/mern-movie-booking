@@ -10,7 +10,6 @@ const Usernavbar = ({ searchTerm, setSearchTerm }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Clear local storage and update login status
     localStorage.clear();
     setIsLoggedIn(false);
     navigate('/');
@@ -21,12 +20,11 @@ const Usernavbar = ({ searchTerm, setSearchTerm }) => {
     const userType = localStorage.getItem("usertype");
     if (userType === 'user') {
       setIsLoggedIn(true);
-      // Retrieve and parse the stored user data
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
         try {
           const userObj = JSON.parse(storedUser);
-          setUsername(userObj.name); // Assumes the user object has a "name" property
+          setUsername(userObj.name);
         } catch (err) {
           console.error('Error parsing user data from localStorage:', err);
         }
@@ -60,7 +58,6 @@ const Usernavbar = ({ searchTerm, setSearchTerm }) => {
         </div>
 
         <div className="navbar-left">
-          {/* Always show My Bookings link; if not logged in, show popup instead of navigating */}
           <NavLink
             className="user-nav"
             to="/mybooking"
@@ -91,14 +88,12 @@ const Usernavbar = ({ searchTerm, setSearchTerm }) => {
         </div>
 
         <div className="navbar-right">
-          {/* Display username if logged in */}
           {isLoggedIn && (
             <div className="user-info">
-              <span>Welcome {username.split(" ")[0]}</span>
+              <span>Welcome, {username.split(" ")[0]}</span>
             </div>
           )}
 
-          {/* Hamburger Menu Wrapper */}
           <div className="hamburger-wrapper">
             <div className={`hamburger-menu ${isOpen ? 'active' : ''}`} onClick={toggleMenu}>
               <div className="bar"></div>
@@ -145,7 +140,6 @@ const Usernavbar = ({ searchTerm, setSearchTerm }) => {
         </div>
       </div>
 
-      {/* Popup Modal for prompting login when accessing My Bookings */}
       {showPopup && (
         <div className="popup-overlay-Booking">
           <div className="popup-Booking">
@@ -174,4 +168,4 @@ const Usernavbar = ({ searchTerm, setSearchTerm }) => {
   );
 };
 
-export default Usernavbar;
+export default Usernavbar;

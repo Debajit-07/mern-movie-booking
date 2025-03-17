@@ -1,3 +1,7 @@
+/* ============================= */
+/* ORIGINAL CSS (DO NOT CHANGE)  */
+/* ============================= */
+
 /* General container styling */
 .ticketbooking-container {
   font-family: 'Arial', sans-serif;
@@ -172,11 +176,124 @@
 .Modal button:last-child:hover {
   background-color: #d32f2f;
 }
-.seat-row h5{
+
+.seat-row h5 {
   padding: 10px;
   color: #ccc;
 }
 
-.screen-image{
+.screen-image {
   width: 450px;
+}
+
+/* ============================= */
+/* RESPONSIVE MEDIA QUERIES      */
+/* (OVERRIDES ONLY – DO NOT REMOVE) */
+/* ============================= */
+
+/* For larger tablets and small desktops */
+@media (max-width: 1200px) {
+  .ticketbooking-container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .screen-image {
+    width: 100%;
+    max-width: 450px;
+  }
+}
+
+/* For medium devices / tablets */
+@media (max-width: 992px) {
+  .ticketbooking-container {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  .header h2 {
+    font-size: 22px;
+  }
+  .seat {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 12px;
+  }
+  .pay-button {
+    font-size: 16px;
+    padding: 10px 20px;
+  }
+  .Modal {
+    width: 90%;
+    max-width: 350px;
+    padding: 20px;
+  }
+}
+
+/* For small devices / mobile devices */
+@media (max-width: 768px) {
+  .ticketbooking-container {
+    padding: 10px;
+    margin: 10px auto;
+  }
+  .header h2 {
+    font-size: 20px;
+  }
+  .seat-selection-container {
+    padding: 8px;
+  }
+  .seat-type-section h4 {
+    font-size: 16px;
+  }
+  .seat {
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    font-size: 11px;
+  }
+  .screen-image {
+    width: 100%;
+    max-width: 300px;
+  }
+  .pay-button {
+    font-size: 14px;
+    padding: 8px 18px;
+  }
+  .Modal {
+    width: 90%;
+    max-width: 300px;
+    padding: 15px;
+  }
+}
+
+/* For extra small devices */
+@media (max-width: 480px) {
+  .ticketbooking-container {
+    padding: 8px;
+    margin: 5px auto;
+  }
+  .header h2 {
+    font-size: 18px;
+  }
+  .seat-type-section h4 {
+    font-size: 14px;
+  }
+  .seat {
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+    font-size: 10px;
+  }
+  .screen-image {
+    width: 100%;
+    max-width: 250px;
+  }
+  .pay-button {
+    font-size: 12px;
+    padding: 6px 14px;
+  }
+  .Modal {
+    width: 90%;
+    max-width: 250px;
+    padding: 10px;
+  }
 }
