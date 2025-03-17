@@ -1,0 +1,409 @@
+.userhome-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ensure full height */
+}
+
+.userhome-content {
+  flex: 1; /* Push footer to the bottom */
+}
+
+/* Navbar spacing */
+.Usernavbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: #333;
+  padding-bottom: 10px; /* Adds spacing below the navbar */
+}
+
+/* Slider container */
+.continuous-slider {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  white-space: nowrap;
+}
+.slider-track {
+  display: flex;
+  width: calc(200%); /* Adjust for duplicated images */
+  animation: scroll 35s linear infinite;
+  gap: 6px; /* Increased gap slightly for spacing */
+  align-items: center; /* Ensure images stay aligned properly */
+}
+
+.slider-image {
+  margin-top: 90px; /* Adjust the margin as needed */
+  width: 30%; /* Increased width for bigger images */
+  height: 300px; /* Increased height */
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 8px; /* Slightly rounded corners */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15); /* Slight shadow for depth */
+}
+
+@keyframes scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-130%); /* Full width scroll */
+  }
+}
+
+
+.movie-posters {
+  display: block;
+  padding: 5px; /* Space inside the container */
+  text-align: center;
+}
+
+.movie-posters img {
+  width: 220px; 
+  aspect-ratio: 12 / 17; 
+  object-fit: cover; 
+  border-radius: 1px; 
+  border: none; 
+  outline: none; 
+  box-shadow: none; 
+  transition: transform 0.3s ease; 
+}
+
+.movie-posters img:hover {
+  transform: scale(1.05); /* Slight zoom on hover */
+}
+
+.movie-posters a {
+  text-decoration: none; 
+  color: #1e1e1e;
+  border: none;
+}
+
+/* Footer styles */
+.footer {
+  background-color: #333;
+  padding: 20px 0;
+  text-align: center;
+  color: white;
+  width: 100%;
+  margin-top: auto; 
+}
+
+/* Footer Content (base styles) */
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Responsive fixes */
+@media (max-width: 768px) {
+  .footer-content {
+    padding: 0 10px;
+  }
+}
+
+.social-icons {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.social-icons li {
+  margin: 0 20px;
+}
+
+.social-icons a {
+  text-decoration: none;
+  color: whitesmoke;
+}
+
+.social-icons a:hover {
+  color: goldenrod;
+}
+
+/* Dark and light mode styles */
+.light-mode {
+  background-color: white;
+  color: white;
+}
+
+.dark-mode {
+  background-color: #1e1e1e;
+  color: white;
+}
+
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.theme-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  color: inherit;
+}
+
+.theme-button:hover {
+  color: #f39c12;
+}
+
+.contact-footer {
+  text-decoration: none;
+  color: white;
+}
+
+.contact-footer:hover {
+  color: #f39c12;
+}
+
+/* Search logo styling */
+.search-logo {
+  margin-right: 10px; /* Add space between logo and search bar */
+}
+
+.search-logo img {
+  width: 20px; /* Adjust size of the search icon */
+  height: 20px; /* Maintain square dimensions */
+}
+
+.ad-banner {
+  background: linear-gradient(to right, #1e1e1e, #2a2a2a); /* Dark gradient background */
+  color: white;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px auto;
+  border-radius: 10px; /* Rounded corners */
+  width: 80%; /* Adjust width as needed */
+  max-width: 1400px; /* Set maximum width */
+}
+
+.ad-content {
+  text-align: center;
+}
+
+.ad-title {
+  font-size: 24px; /* Adjust title size */
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.ad-text {
+  font-size: 18px; /* Adjust subtitle size */
+}
+
+/* Chatbot.css */
+/* Popup Chatbot Message Styles */
+.chatbot-popup-message {
+  position: fixed; /* Ensures the message sticks with the chatbot */
+  bottom: 90px; /* Adjust to position it above the chatbot logo */
+  right: 20px; /* Align with the chatbot */
+  background-color: #ff6347; /* Tomato color */
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  z-index: 1000;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  white-space: nowrap; /* Prevent text from wrapping */
+}
+
+.chatbot-popup-message::after {
+  content: "";
+  position: absolute;
+  bottom: -10px; /* Position the arrow right below the popup */
+  right: 15px; /* Align the arrow with the popup box */
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #ff6347; /* Same color as popup background */
+}
+
+/* Lock the card grid to 4 columns */
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(4, 250px);
+  gap: 55px;
+  justify-content: center;
+  width: calc(4 * 250px + 3 * 55px); /* Fixed width: 1165px */
+  margin: 0 auto;
+}
+
+.card {
+  width: 250px;       /* Fixed width */
+  height: 516px;      /* Fixed height */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  height: 120px; /* Fixed height to ensure consistent spacing */
+}
+
+.language-section {
+  margin: 20px auto;
+  text-align: center;
+  padding: 10px;
+}
+
+.language-section h2 {
+  color: #333;
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.language-buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.language-button {
+  border: 1px solid #ddd;
+  background: white;
+  color: #ff4500;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+}
+
+.language-button:hover {
+  background: #ff4500;
+  color: white;
+}
+
+.language-button.active {
+  background: #ff4500;
+  color: white;
+  font-weight: bold;
+}
+
+/* Enhanced Footer Styles */
+.footer.big-footer {
+  background-color: #222;
+  color: #fff;
+  padding: 40px 20px;
+  margin-top: auto;
+}
+
+.footer.big-footer a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.footer.big-footer a:hover {
+  color: #f39c12;
+}
+
+.footer-content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.footer-section {
+  flex: 1;
+  min-width: 200px;
+  margin: 10px;
+  padding: 0 10px;
+}
+.footer-section li:hover {
+  color: #f39c12;
+}
+
+.footer-section h4 {
+  text-align: left;
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+.footer-section p,
+.footer-section ul {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-section ul li {
+  margin-bottom: 10px;
+}
+
+.footer-bottom {
+  text-align: center;
+  border-top: 1px solid #444;
+  padding-top: 20px;
+  font-size: 14px;
+}
+
+.social-icons {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.social-icons svg {
+  margin: 0 10px;
+  font-size: 24px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.social-icons svg:hover {
+  color: goldenrod;
+}
+
+
+@media (max-width: 1200px) {
+  .card-container {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 992px) {
+  .card-container {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .card-container {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-container {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}
