@@ -27,6 +27,7 @@ import ContactUs from './components/User/Home/ContactUs';
 import Trylogin from './components/User/Login/Userlogin';
 import Multimedia from './components/User/Home/Multimedia';
 import MovieShowtime from './components/User/Home/MovieShowtime';
+import ReviewForm from './components/User/Home/ReviewForm';
 
 const App=()=> {
 return (
@@ -85,6 +86,8 @@ return (
             element = {<Multimedia/>}/>
             <Route path = '/MovieShowtime'
             element = {<MovieShowtime/>}/>
+            <Route path = '/reviewForm'
+            element = {<ReviewForm/>}/>
         </Routes>
         </Router>
   </>

@@ -55,24 +55,21 @@
 }
 
 
-/* Movie posters container */
 .movie-posters {
-  display: flex;
-  flex-wrap: wrap; /* Allow the cards to wrap onto new rows */
-  justify-content: center; /* Center the cards in the container */
-  gap: 5px; /* Space between the cards */
-  padding: 10px; /* Space inside the container */
+  display: block;
+  padding: 5px; /* Space inside the container */
+  text-align: center;
 }
 
 .movie-posters img {
-  width: 220px; /* Set a fixed width for all posters */
-  height: 320px; /* Set a fixed height for all posters */
-  object-fit: cover; /* Keep image proportions while filling the space */
-  border-radius: 1px; /* Add rounded corners */
-  border: none; /* Remove any border */
-  outline: none; /* Remove any outline */
-  box-shadow: none; /* Remove box shadow if it creates a box effect */
-  transition: transform 0.3s ease; /* Smooth hover effect */
+  width: 220px; 
+  aspect-ratio: 12 / 17; 
+  object-fit: cover; 
+  border-radius: 1px; 
+  border: none; 
+  outline: none; 
+  box-shadow: none; 
+  transition: transform 0.3s ease; 
 }
 
 .movie-posters img:hover {
@@ -80,7 +77,7 @@
 }
 
 .movie-posters a {
-  text-decoration: none; /* Remove underline from all links */
+  text-decoration: none; 
   color: #1e1e1e;
   border: none;
 }
@@ -92,7 +89,7 @@
   text-align: center;
   color: white;
   width: 100%;
-  margin-top: auto; /* Pushes footer to bottom naturally */
+  margin-top: auto; 
 }
 
 /* Footer Content (base styles) */
@@ -233,16 +230,25 @@
   border-top: 10px solid #ff6347; /* Same color as popup background */
 }
 
+/* Lock the card grid to 4 columns */
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(4, 250px);
+  gap: 55px;
+  justify-content: center;
+  width: calc(4 * 250px + 3 * 55px); /* Fixed width: 1165px */
+  margin: 0 auto;
+}
+
 .card {
+  width: 250px;       /* Fixed width */
+  height: 516px;      /* Fixed height */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: none;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  width: 250px; /* Fixed width for all cards */
-  height: 515px; /* Fixed height for all cards */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin: 20px; /* Ensure proper spacing */
-  border: none;
 }
 
 .card-content {
@@ -324,8 +330,8 @@
   margin: 10px;
   padding: 0 10px;
 }
-.footer-section li:hover{
-  color:#f39c12;
+.footer-section li:hover {
+  color: #f39c12;
 }
 
 .footer-section h4 {
@@ -338,7 +344,6 @@
 .footer-section ul {
   font-size: 16px;
   line-height: 1.5;
-
 }
 
 .footer-section ul {
@@ -348,7 +353,6 @@
 
 .footer-section ul li {
   margin-bottom: 10px;
-
 }
 
 .footer-bottom {
@@ -358,8 +362,6 @@
   font-size: 14px;
 }
 
-/* Social Media Icon Styles */
-/* Added icon styles only for the footer icons, leaving other footer styles unchanged */
 .social-icons {
   padding: 20px;
   display: flex;
@@ -376,4 +378,32 @@
 
 .social-icons svg:hover {
   color: goldenrod;
+}
+
+
+@media (max-width: 1200px) {
+  .card-container {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 992px) {
+  .card-container {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .card-container {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-container {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
 }

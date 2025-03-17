@@ -10,6 +10,11 @@ const multer = require('multer');
 const screenRoutes = require('../MongoDB/Routes/screenRoutes'); // Ensure this path is correct
 const stripe = require("stripe")("sk_test_51PyTTVBPFFoOUNzJjLQNya8NZBe6lmtmjUnNa9gY36ZVIt28iu4lYZar86bgditVgulnsdgnwjp9UhhQG3ZOBYec00UJjCLxQF"); // Use environment variable for security
 const crypto = require('crypto');
+const mongoose = require('mongoose');
+
+const connectDB = require("./db"); // Adjust the path if needed
+connectDB();
+
 
 const app = express();
 
@@ -142,6 +147,7 @@ app.get('/movieview', mongoPractice.getMovieProduct);
 app.get('/getmovieview/:pid', mongoPractice.getMovieProductById);
 app.patch('/movieview/update/:pid', mongoPractice.updateMovieProductById);
 app.delete('/movieview/delete/:pid', mongoPractice.deleteMovieProductById);
+app.post('/movieview/review/:pid', mongoPractice.addReviewToMovie);
 
 // User routes
 app.get('/users', mongoPractice.getUsers);

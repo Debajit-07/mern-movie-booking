@@ -1,17 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate,} from "react-router-dom";
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../Home/Moviedetails.css"; // Ensure this path is correct
+import "../Home/Moviedetails.css"; // Ensure the path is correct
 import Usernavbar from "./Usernavbar";
-import { FaFilm } from "react-icons/fa"; 
-import {
-  FaFacebookF,
-  FaTwitter,
-  FaInstagram,
-  FaYoutube,
-  FaPinterest,
-  FaLinkedin,
-} from "react-icons/fa";
+import { FaFilm } from "react-icons/fa";
+import { FaStar } from "react-icons/fa";
 
 function Moviedetails() {
   // States for movie details
@@ -26,26 +19,37 @@ function Moviedetails() {
   const [trailerLink, setTrailerLink] = useState("");
   const [id, setId] = useState("");
 
+  // Reviews state (per movie)
+  const [reviews, setReviews] = useState([]);
+
   // Popup state for language selection
   const [showLanguagePopup, setShowLanguagePopup] = useState(false);
 
-  // States for footer dynamic content
-  const [uniqueLanguages, setUniqueLanguages] = useState([]);
-  const [uniqueGenres, setUniqueGenres] = useState([]);
-  const [uniqueMovies, setUniqueMovies] = useState([]);
+  // State for review modal and review form fields
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewerName, setReviewerName] = useState("");
+  const [reviewRating, setReviewRating] = useState("");
+  const [reviewText, setReviewText] = useState("");
 
   const navigate = useNavigate();
+  const reviewsSliderRef = useRef(null);
+  // "right" = arrow on right side (default), "left" = arrow on left side
+  const [arrowPosition, setArrowPosition] = useState("right");
 
   // Scroll to top on mount
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Fetch the movie details by ID
+  /**
+   * Fetch movie details and reviews from the server.
+   * If reviews are empty, fall back to the reviews saved in localStorage
+   * using a key that is specific to the movie.
+   */
   const fetchData = async (movieId) => {
+    const localKey = "moviereviews_" + movieId;
     try {
       const response = await axios.get(`http://localhost:5000/getmovieview/${movieId}`);
-      console.log("API Response:", response.data);
       const {
         movieName,
         movieGenre,
@@ -56,7 +60,9 @@ function Moviedetails() {
         imageURL,
         movieCast,
         trailerLink,
+        reviews: fetchedReviews,
       } = response.data;
+
       setMovieImage(imageURL);
       setMovieName(movieName);
       setMovieGenre(movieGenre);
@@ -66,12 +72,28 @@ function Moviedetails() {
       setMovieDescription(movieDescription);
       setMovieCast(movieCast || []);
       setTrailerLink(trailerLink || "");
+
+      if (fetchedReviews && fetchedReviews.length > 0) {
+        setReviews(fetchedReviews);
+        localStorage.setItem(localKey, JSON.stringify(fetchedReviews));
+      } else {
+        const storedReviews = localStorage.getItem(localKey);
+        if (storedReviews) {
+          setReviews(JSON.parse(storedReviews));
+        } else {
+          setReviews([]);
+        }
+      }
     } catch (error) {
       console.error("Error fetching movie data:", error);
+      const storedReviews = localStorage.getItem(localKey);
+      if (storedReviews) {
+        setReviews(JSON.parse(storedReviews));
+      }
     }
   };
 
-  // On component mount, get the movie ID from localStorage
+  // On component mount, get movie ID from localStorage then fetch details.
   useEffect(() => {
     const movieId = localStorage.getItem("id");
     if (!movieId) {
@@ -82,76 +104,118 @@ function Moviedetails() {
     fetchData(movieId);
   }, [navigate]);
 
-  // Navigate to the trailer page (multimedia) when poster is clicked
+  // Navigate to the trailer page when poster is clicked
   const handlePosterClick = () => {
     navigate("/multimedia", { state: { trailerLink, movieName } });
   };
 
-  // Show the language popup instead of navigating immediately
+  // Show language popup
   const handleClick = () => {
     setShowLanguagePopup(true);
   };
 
-  // Called when user selects a language in the popup
+  // Called when user selects a language
   const handleLanguageSelect = (chosenLanguage) => {
     const storedEmail = localStorage.getItem("userEmail") || "";
-    // Pass chosenLanguage to MovieShowtime if you like
     navigate("/movieShowtime", {
       state: {
         movieName,
         userEmail: storedEmail,
-        chosenLanguage: chosenLanguage, // if you want to store the chosen language
+        chosenLanguage,
       },
     });
     setShowLanguagePopup(false);
   };
 
-  // Close the language popup
+  // Close language popup
   const closeLanguagePopup = () => {
     setShowLanguagePopup(false);
   };
 
-  // Fetch dynamic data for the footer (languages, genres, movies)
-  useEffect(() => {
-    const fetchFooterData = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/movieview");
-        const data = response.data;
-
-        // Compute unique languages
-        const languages = [
-          ...new Set(
-            data.flatMap((movie) =>
-              movie.movieLanguage.split(/[\/,]/).map((lang) => lang.trim())
-            )
-          ),
-        ];
-        setUniqueLanguages(languages);
-
-        // Compute unique genres
-        const genres = [...new Set(data.map((movie) => movie.movieGenre))];
-        setUniqueGenres(genres);
-
-        // Compute unique movies (by movieName)
-        const unique = data.reduce((acc, movie) => {
-          if (!acc.find((m) => m.movieName === movie.movieName)) {
-            acc.push(movie);
-          }
-          return acc;
-        }, []);
-        setUniqueMovies(unique);
-      } catch (error) {
-        console.error("Error fetching footer data:", error);
-      }
-    };
-
-    fetchFooterData();
-  }, []);
-
-  // (CHANGED) Convert the movieLanguage field into an array of languages
+  // Convert movieLanguage to an array of languages (if needed)
   const splittedLangs = movieLanguage
     ? movieLanguage.split(/[\/,]/).map((lang) => lang.trim())
     : [];
+
+  /* 
+     SINGLE ARROW SLIDER LOGIC:
+     - on scroll, if at left edge, arrow shows on right ("right").
+     - if at right edge, arrow shows on left ("left").
+     - otherwise, default to "right".
+  */
+  const handleScroll = () => {
+    if (!reviewsSliderRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = reviewsSliderRef.current;
+
+    if (scrollLeft <= 10) {
+      setArrowPosition("right");
+    } else if (scrollLeft + clientWidth >= scrollWidth - 10) {
+      setArrowPosition("left");
+    } else {
+      setArrowPosition("right");
+    }
+  };
+
+  const handleArrowClick = () => {
+    if (!reviewsSliderRef.current) return;
+    const { scrollWidth, clientWidth } = reviewsSliderRef.current;
+    if (arrowPosition === "right") {
+      // Scroll to far right
+      reviewsSliderRef.current.scrollLeft = scrollWidth;
+    } else {
+      // Scroll to far left
+      reviewsSliderRef.current.scrollLeft = 0;
+    }
+  };
+
+  // Handler to open review modal
+  const openReviewModal = () => {
+    setShowReviewModal(true);
+  };
+
+  // Handler to close review modal
+  const closeReviewModal = () => {
+    setShowReviewModal(false);
+  };
+
+  // Handle review submission from the modal
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+
+    // Basic validation
+    if (!reviewRating) {
+      alert("Please select a rating.");
+      return;
+    }
+
+    try {
+      // POST the review to the server
+      const response = await axios.post(
+        `http://localhost:5000/movieview/review/${id}`,
+        {
+          rating: parseInt(reviewRating, 10),
+          review: reviewText,
+          user: reviewerName.trim() || "Anonymous",
+        }
+      );
+
+      // Update local storage and reviews state
+      const localKey = "moviereviews_" + id;
+      localStorage.setItem(localKey, JSON.stringify(response.data.reviews));
+      setReviews(response.data.reviews);
+
+      // Clear the form fields
+      setReviewerName("");
+      setReviewRating("");
+      setReviewText("");
+
+      // Close the modal
+      closeReviewModal();
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      alert("Error submitting review. Please try again.");
+    }
+  };
 
   return (
     <>
@@ -159,36 +223,36 @@ function Moviedetails() {
 
       {/* Movie Details Section */}
       <div className="moviedetails-container">
-      {movieImage && (
-        <div className="detail-item-1 poster-container">
-          <img src={movieImage} alt={movieName} className="movie-image" />
-        </div>
-      )}
-
-      <div className="detail-item-2">
-        <h1>{movieName}</h1>
-        <div className="movie-stats">
-          <span>{movieLanguage}</span>
-          <span>{movieGenre}</span>
-          <span>{movieFormat}</span>
-          <span>{movieDuration}</span>
-        </div>
-
-        {/* Trailer Button Above Book Ticket Button */}
-        <div className="trailer-button-container">
-        <button onClick={handlePosterClick} className="trailer-button">
-          <FaFilm className="trailer-icon" /> Watch Trailer</button>
-
-        </div>
-
-        <div className="booking-button-container">
-          <button onClick={handleClick} className="booking-button"> Book Tickets</button>
+        {movieImage && (
+          <div className="detail-item-1 poster-container">
+            <img src={movieImage} alt={movieName} className="movie-image" />
+          </div>
+        )}
+        <div className="detail-item-2">
+          <h1>{movieName}</h1>
+          <div className="movie-stats">
+            <span>{movieLanguage}</span>
+            <span>{movieGenre}</span>
+            <span>{movieFormat}</span>
+            <span>{movieDuration}</span>
+          </div>
+          {/* Trailer Button */}
+          <div className="trailer-button-container">
+            <button onClick={handlePosterClick} className="trailer-button">
+              <FaFilm className="trailer-icon" /> Watch Trailer
+            </button>
+          </div>
+          {/* Book Tickets Button */}
+          <div className="booking-button-container">
+            <button onClick={handleClick} className="booking-button">
+              Book Tickets
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
       {/* Movie Description */}
-      <div className="movie-description">
+      <div className="Movie-description">
         <h2>About the movie</h2>
         <p>{movieDescription}</p>
       </div>
@@ -216,6 +280,93 @@ function Moviedetails() {
         </ul>
       </div>
 
+      {/* Movie Reviews (Horizontal Slider with Single Arrow) */}
+      <div className="movie-reviews">
+        <h2>Reviews</h2>
+        {reviews.length > 0 ? (
+          <div className="reviews-slider-container">
+            <button className={`slider-arrow ${arrowPosition}`} onClick={handleArrowClick}>
+              {arrowPosition === "right" ? ">" : "<"}
+            </button>
+            <div className="reviews-slider" ref={reviewsSliderRef} onScroll={handleScroll}>
+              <ul>
+                {reviews.map((item, index) => (
+                  <li key={index}>
+                    <div className="review-item">
+                      <p>
+                        <strong>{item.user || "Anonymous"}</strong> rated it⭐ {item.rating} / 5
+                      </p>
+                      {item.review && <p>{item.review}</p>}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ) : (
+          <p>No reviews available.</p>
+        )}
+      </div>
+
+      {/* Submit Review Button */}
+      <div className="submit-review-container">
+        <button onClick={openReviewModal} className="submit-review-button">
+          Submit Your Review
+        </button>
+      </div>
+
+      {/* Review Modal */}
+      {showReviewModal && (
+        <div className="modal-overlay-review">
+          <div className="modal-content-review">
+            <span className="modal-close-review" onClick={closeReviewModal}>
+              &times;
+            </span>
+            <h2>Submit Your Review</h2>
+            <form onSubmit={handleReviewSubmit}>
+              <div className="form-group">
+                <label htmlFor="reviewerName">Your Name</label>
+                <input
+                  id="reviewerName"
+                  type="text"
+                  value={reviewerName}
+                  onChange={(e) => setReviewerName(e.target.value)}
+                  placeholder="Enter your name"
+                />
+              </div>
+              <div className="custom-rating-container">
+  <FaStar className="rating-star-icon" />
+  <div className="slider-wrapper">
+    <input
+      type="range"
+      min="0"
+      max="10"
+      step="1"
+      value={reviewRating}
+      onChange={(e) => setReviewRating(e.target.value)}
+      className="rating-slider"
+    />
+    <span className="slider-label">SLIDE TO RATE &rarr;</span>
+  </div>
+  <span className="rating-value">{reviewRating}/10</span>
+</div>
+              <div className="form-group">
+                <label htmlFor="review">Review</label>
+                <textarea
+                  id="review"
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  rows="4"
+                  placeholder="Share your thoughts about the movie"
+                />
+              </div>
+              <button type="submit" className="submit-button">
+                Submit Review
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Language Popup */}
       {showLanguagePopup && (
@@ -226,7 +377,6 @@ function Moviedetails() {
             </span>
             <h2>Select Language</h2>
             <div style={{ marginTop: "1rem" }}>
-              {/* (CHANGED) Dynamically list languages from movieLanguage */}
               {splittedLangs.map((lang, index) => (
                 <button
                   key={index}

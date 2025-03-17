@@ -58,9 +58,13 @@ const UserHome = () => {
 
   // Filter movies based on selected language(s) and search term
   const filteredData = data.filter(item => {
-    const movieLanguages = item.movieLanguage.split(/[\/,]/).map(lang => lang.trim().toLowerCase());
+    const movieLanguages = item.movieLanguage
+      .split(/[\/,]/)
+      .map(lang => lang.trim().toLowerCase());
+
     const matchesLanguage =
-      selectedLanguages.length === 0 || selectedLanguages.some(selectedLang =>
+      selectedLanguages.length === 0 ||
+      selectedLanguages.some(selectedLang =>
         movieLanguages.includes(selectedLang.toLowerCase())
       );
 
@@ -122,7 +126,7 @@ const UserHome = () => {
             >
               All Movies
             </button>
-            {["Hindi", "English", "Marathi", "Gujarati", "Tamil", "Telugu", "Bengali"].map((lang) => (
+            {["Hindi", "English", "Marathi", "Gujarati", "Tamil", "Telugu", "Bengali"].map(lang => (
               <button
                 key={lang}
                 className={`language-button ${selectedLanguages.includes(lang) ? 'active' : ''}`}
@@ -134,27 +138,37 @@ const UserHome = () => {
           </div>
         </div>
 
-        {/* Movie Posters Section */}
+        {/* Movie Posters Section with Grid Layout */}
         <div className="movie-posters">
-          {filteredData.map((item) => (
-            <Link 
-              to="/moviedetails" 
-              key={item._id} 
-              state={{ 
-                movieName: item.movieName, 
-                userEmail: localStorage.getItem("userEmail") 
-              }}
-            >
-              <Card
-                image={`${path}${item.image}`}
-                movieName={item.movieName}
-                movieGenre={item.movieGenre}
-                movieLanguage={item.movieLanguage}
-                movieFormat={item.movieFormat} 
-                onClick={() => setID(item._id, item.movieName, item.movieGenre, item.movieLanguage, item.movieFormat)}
-              />
-            </Link>
-          ))}
+          <div className="card-container">
+            {filteredData.map((item) => (
+              <Link 
+                to="/moviedetails" 
+                key={item._id} 
+                state={{ 
+                  movieName: item.movieName, 
+                  userEmail: localStorage.getItem("userEmail") 
+                }}
+              >
+                <Card
+                  image={`${path}${item.image}`}
+                  movieName={item.movieName}
+                  movieGenre={item.movieGenre}
+                  movieLanguage={item.movieLanguage}
+                  movieFormat={item.movieFormat} 
+                  onClick={() =>
+                    setID(
+                      item._id,
+                      item.movieName,
+                      item.movieGenre,
+                      item.movieLanguage,
+                      item.movieFormat
+                    )
+                  }
+                />
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Ad Banner */}
@@ -198,7 +212,15 @@ const UserHome = () => {
                 <li key={index}>
                   <Link 
                     to="/moviedetails" 
-                    onClick={() => setID(movie._id, movie.movieName, movie.movieGenre, movie.movieLanguage, movie.movieFormat)}
+                    onClick={() =>
+                      setID(
+                        movie._id,
+                        movie.movieName,
+                        movie.movieGenre,
+                        movie.movieLanguage,
+                        movie.movieFormat
+                      )
+                    }
                     state={{ 
                       movieName: movie.movieName, 
                       userEmail: localStorage.getItem("userEmail") 
@@ -233,7 +255,10 @@ const UserHome = () => {
             </a>
           </div>
           <p>&copy; {new Date().getFullYear()} TICKETFLIX. All Rights Reserved.</p>
-          <p>The content and images on this site are protected by copyright and remain the property of their respective owners.</p>
+          <p>
+            The content and images on this site are protected by copyright 
+            and remain the property of their respective owners.
+          </p>
         </div>
       </footer>
 

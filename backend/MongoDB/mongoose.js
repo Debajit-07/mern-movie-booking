@@ -11,13 +11,7 @@ const Admin = require('./models/Admin')
 const { validationResult } = require('express-validator');
 const HttpError = require('./models/http-error');
 //connect to mongoDB
-mongoose.connect(
-    'mongodb://0.0.0.0:27017/'
-).then(() => {
-    console.log('connected to the database')
-}).catch(() => {
-    console.log('connection failed')
-});
+
 // Creating get /post/ update/ delete for all the schemas
 
 // mongodb we have to Create the post method to add screen into the mongodb
@@ -133,8 +127,6 @@ const movieProduct = async (req, res, next) => {
   
   console.log("Mapped movie cast:", parsedMovieCast);
   
-  
-
   const movieProduct = new Product1({
     movieName,
     img: {
@@ -162,20 +154,17 @@ const movieProduct = async (req, res, next) => {
   return res.status(201).json({ product: movieProduct });
 };
 
-//------------------------------------------------------------------------------------------------------
-
+// Get all movie products
 const getMovieProduct = async (req, res, next) => {
   const product = await Product1.find().exec();
 
-  // if product is null
   if (!product) {
     return res.status(404).send('Not Found');
   }
   res.json(product);
 };
 
-// MongoDB: Create the get method by ID for movie product to get the product by id
-
+// Get movie product by ID
 const getMovieProductById = async (req, res, next) => {
   const id = req.params.pid;
 
@@ -193,11 +182,11 @@ const getMovieProductById = async (req, res, next) => {
       movieGenre: product.movieGenre,
       movieLanguage: product.movieLanguage,
       movieDuration: product.movieDuration,
-      movieCast: product.movieCast, // Now includes name and image
+      movieCast: product.movieCast,
       movieDescription: product.movieDescription,
       movieReleasedate: product.movieReleasedate,
       trailerLink: product.trailerLink,
-      movieFormat: product.movieFormat, // Return the movie format field
+      movieFormat: product.movieFormat,
       imageURL,
     });
   } catch (err) {
@@ -205,8 +194,7 @@ const getMovieProductById = async (req, res, next) => {
   }
 };
 
-// MongoDB: Create the update method to update movie product in MongoDB
-
+// Update movie product by ID
 const updateMovieProductById = async (req, res, next) => {
   const id = req.params.pid;
   const updateData = {
@@ -218,7 +206,7 @@ const updateMovieProductById = async (req, res, next) => {
     movieDescription: req.body.movieDescription,
     movieReleasedate: req.body.movieReleasedate,
     trailerLink: req.body.trailerLink,
-    movieFormat: req.body.movieFormat, // Update movie format field
+    movieFormat: req.body.movieFormat,
   };
   const product = await Product1.findByIdAndUpdate(id, updateData, { new: true });
   if (!product) {
@@ -227,8 +215,7 @@ const updateMovieProductById = async (req, res, next) => {
   res.json(product);
 };
 
-// MongoDB: Create the delete method to delete the movie product from MongoDB
-
+// Delete movie product by ID
 const deleteMovieProductById = async (req, res, next) => {
   const id = req.params.pid;
   const product = await Product1.findByIdAndDelete(id).exec();
@@ -237,6 +224,43 @@ const deleteMovieProductById = async (req, res, next) => {
   }
   res.send('Delete successful');
 };
+
+// Add a review to a movie product
+const addReviewToMovie = async (req, res, next) => {
+  const movieId = req.params.pid;
+  // Retrieve rating, review, and user (reviewer's name) from the request body
+  const { rating, review, user } = req.body;
+  // Use the provided user name, or default to "Anonymous" if none is provided
+  const reviewer = user && user.trim() !== "" ? user.trim() : "Anonymous";
+
+  try {
+    const product = await Product1.findById(movieId);
+    if (!product) {
+      return res.status(404).json({ message: "Movie not found" });
+    }
+
+    if (rating < 0 || rating > 10) {
+      return res.status(400).json({ message: "Rating must be between 0 and 10" });
+    }
+
+    product.reviews.push({
+      user: reviewer,
+      rating,
+      review,
+      createdAt: new Date(),
+    });
+
+    await product.save();
+    return res.status(201).json({
+      message: "Review added successfully",
+      reviews: product.reviews,
+    });
+  } catch (err) {
+    console.error("Error adding review:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 
 //------------------------------------------------------------------------------------------
 
@@ -720,6 +744,7 @@ exports.getMovieProduct = getMovieProduct;
 exports.getMovieProductById = getMovieProductById;
 exports.updateMovieProductById = updateMovieProductById;
 exports.deleteMovieProductById = deleteMovieProductById;
+exports.addReviewToMovie = addReviewToMovie;
 
 // Exporting all post, get, update, delete method for screen product
 
