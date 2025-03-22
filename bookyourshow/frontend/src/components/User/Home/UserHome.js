@@ -19,7 +19,7 @@ import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube, FaPinterest, FaLinkedin
 const UserHome = () => {
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [path] = useState('http://localhost:5000/uploads/');
+  // Removed the local 'path' variable as images are now stored as full URLs
   const [selectedLanguages, setSelectedLanguages] = useState([]); // For filtering by language
 
   const images = [slide1, slide2, slide3, slide4, slide5];
@@ -151,7 +151,8 @@ const UserHome = () => {
                 }}
               >
                 <Card
-                  image={`${path}${item.image}`}
+                  // Use the image URL directly from the backend
+                  image={item.image}
                   movieName={item.movieName}
                   movieGenre={item.movieGenre}
                   movieLanguage={item.movieLanguage}

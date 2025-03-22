@@ -10,11 +10,7 @@ const User = require('./models/user')
 const Admin = require('./models/Admin')
 const { validationResult } = require('express-validator');
 const HttpError = require('./models/http-error');
-//connect to mongoDB
 
-// Creating get /post/ update/ delete for all the schemas
-
-// mongodb we have to Create the post method to add screen into the mongodb
 
 const screen = async(req, res, next) => {
   const errors = validationResult(req);
@@ -129,11 +125,13 @@ const movieProduct = async (req, res, next) => {
   
   const movieProduct = new Product1({
     movieName,
-    img: {
-      data: fs.readFileSync(path.join(__dirname, '/uploads/', req.files.image[0].filename)),
-      contentType: req.files.image[0].mimetype,
-    },
-    image: req.files.image[0].filename,
+    // Removed the binary image storage
+    // img: {
+    //   data: fs.readFileSync(path.join(__dirname, '/uploads/', req.files.image[0].filename)),
+    //   contentType: req.files.image[0].mimetype,
+    // },
+    // Now the image field is set from req.body.image (a Google image link)
+    image: req.body.image,
     movieGenre,
     movieLanguage,
     movieDuration,
@@ -260,7 +258,6 @@ const addReviewToMovie = async (req, res, next) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 //------------------------------------------------------------------------------------------
 

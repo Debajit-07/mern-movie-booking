@@ -6,7 +6,8 @@ import { Link } from "react-router-dom";
 
 const Movieview = () => {
   const [data, setData] = useState([]);
-  const [path] = useState("http://localhost:5000/uploads/");
+  // Remove local path as we're now using full URLs for images
+  // const [path] = useState("http://localhost:5000/uploads/");
   const [showPopup, setShowPopup] = useState(false); // Initially false
 
   const fetchData = async () => {
@@ -138,7 +139,8 @@ const Movieview = () => {
                 <td>
                   <img
                     className="table-imagesize"
-                    src={`${path}${item.image}`}
+                    // Now use the full URL stored in item.image
+                    src={item.image}
                     alt={item.movieName}
                   />
                 </td>
@@ -152,7 +154,8 @@ const Movieview = () => {
                       <div key={index} className="cast-container-admin">
                         <img
                           className="cast-image-admin"
-                          src={`${path}${cast.image}`}
+                          // Use the cast image URL directly
+                          src={cast.image}
                           alt={cast.name}
                         />
                         <div>{cast.name}</div>
@@ -163,7 +166,6 @@ const Movieview = () => {
                 <td>{item.movieReleasedate}</td>
                 <td>{item.trailerLink}</td>
                 <td>{item.movieFormat}</td>
-                
                 <td>
                   <Link to="/editmovie">
                     <button

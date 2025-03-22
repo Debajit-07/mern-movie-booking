@@ -162,8 +162,13 @@
 }
 
 .showtime-button:hover .tooltip {
+  display: flex;
+  flex-direction: row;
   visibility: visible;
   opacity: 1;
+}
+.available{
+  color: green;
 }
 
 /* Cancellation info properly aligned below the hall name */

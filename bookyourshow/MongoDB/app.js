@@ -3,18 +3,25 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const { check } = require('express-validator');
-const mongoPractice = require('./mongoose'); // Ensure this path is correct
 const cors = require('cors');
 const bodyparser = require('body-parser');
 const multer = require('multer');
-const screenRoutes = require('../MongoDB/Routes/screenRoutes'); // Ensure this path is correct
-const stripe = require("stripe")("sk_test_51PyTTVBPFFoOUNzJjLQNya8NZBe6lmtmjUnNa9gY36ZVIt28iu4lYZar86bgditVgulnsdgnwjp9UhhQG3ZOBYec00UJjCLxQF"); // Use environment variable for security
+const stripe = require("stripe")("sk_test_51PyTTVBPFFoOUNzJjLQNya8NZBe6lmtmjUnNa9gY36ZVIt28iu4lYZar86bgditVgulnsdgnwjp9UhhQG3ZOBYec00UJjCLxQF"); // Use environment variable in production
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 
+// Connect to your database
 const connectDB = require("./db"); // Adjust the path if needed
 connectDB();
 
+// Import your movieschema model (this file now reuses the model if already compiled)
+const Movie = require('./models/Movieschema');
+
+// For other functions (e.g. login, signup, movieProduct, etc.) from your mongoose file
+const mongoPractice = require('./mongoose');
+
+// Import screen routes (adjust the path as needed)
+const screenRoutes = require('../MongoDB/Routes/screenRoutes');
 
 const app = express();
 
@@ -22,6 +29,9 @@ const app = express();
 app.use(cors());
 app.use(bodyparser.json());
 app.use(express.static('public'));
+
+// Serve static files from the uploads folder
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Stripe Checkout API
 app.post('/api/create-checkout-session', async (req, res) => {
@@ -38,7 +48,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
       product_data: {
         name: `${movieName} - ${seat.seatType} ${seat.seatNumber}`,
       },
-      unit_amount: seat.price * 100, // Stripe requires the amount in the smallest currency unit (e.g., cents)
+      unit_amount: seat.price * 100,
     },
     quantity: 1,
   }));
@@ -67,7 +77,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
   }
 });
 
-// Webhook endpoint to handle Stripe events
+// Stripe webhook endpoint to handle Stripe events
 app.post('/webhook', bodyparser.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET; // Use environment variable for security
@@ -104,32 +114,25 @@ app.post('/webhook', bodyparser.raw({ type: 'application/json' }), async (req, r
   res.json({ received: true });
 });
 
-// Static file serving
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 // Multer setup for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
-    // Add a random number to help ensure uniqueness
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
-
 const upload = multer({ storage: storage });
 
+// User routes
 app.post('/userlogin', mongoPractice.login);
-
 app.post(
   '/userssignup',
   [
     check('name').not().isEmpty(),
-    check('email')
-      .normalizeEmail() // Test@test.com => test@test.com
-      .isEmail(),
+    check('email').normalizeEmail().isEmail(),
     check('password').isLength({ min: 8 })
   ],
   mongoPractice.signup
@@ -144,12 +147,44 @@ app.post('/movieschema/add',
   mongoPractice.movieProduct
 );
 app.get('/movieview', mongoPractice.getMovieProduct);
-app.get('/getmovieview/:pid', mongoPractice.getMovieProductById);
+
+// UPDATED GET route for movie details
+app.get('/getmovieview/:pid', async (req, res, next) => {
+  const id = req.params.pid;
+  try {
+    // Use the imported Movie model
+    const product = await Movie.findById(id).exec();
+    if (!product) {
+      return res.status(404).send('Product not found');
+    }
+    // Construct the full poster URL. If product.image starts with "http", assume it's a full URL.
+    const imageURL = product.image.startsWith("http")
+      ? product.image
+      : `http://localhost:5000/uploads/${product.image}`;
+
+    res.json({
+      movieName: product.movieName,
+      movieGenre: product.movieGenre,
+      movieLanguage: product.movieLanguage,
+      movieDuration: product.movieDuration,
+      movieCast: product.movieCast,
+      movieDescription: product.movieDescription,
+      movieReleasedate: product.movieReleasedate,
+      trailerLink: product.trailerLink,
+      movieFormat: product.movieFormat,
+      imageURL, // Full poster URL
+      reviews: product.reviews || []
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.patch('/movieview/update/:pid', mongoPractice.updateMovieProductById);
 app.delete('/movieview/delete/:pid', mongoPractice.deleteMovieProductById);
 app.post('/movieview/review/:pid', mongoPractice.addReviewToMovie);
 
-// User routes
+// Other User routes
 app.get('/users', mongoPractice.getUsers);
 app.get('/AdmingetUsers', mongoPractice.AdmingetUsers);
 app.post('/adminlogin', mongoPractice.adminlogin);
@@ -163,20 +198,21 @@ app.post(
 );
 
 // Screen routes
-app.use('/api/screen', screenRoutes); // Integrate screenRoutes for /api/screen routes
+app.use('/api/screen', screenRoutes);
 app.post('/screen/add', mongoPractice.screen);
 app.get('/screen', mongoPractice.getscreen);
 app.get('/screen/:pid', mongoPractice.getscreenById);
 app.patch('/screen/update/:pid', mongoPractice.updatescreenById);
 app.delete('/screen/delete/:pid', mongoPractice.deletescreenById);
 
+// Projectschema routes
 app.post('/Projectschema/add', mongoPractice.screenProduct);
 app.get('/Projectschema', mongoPractice.getScreenProducts);
 app.get('/Projectschema/:pid', mongoPractice.getScreenProductById);
 app.get('/Projectschema/user/:userEmail', mongoPractice.getScreenProductsByUserEmail);
 app.patch('/Projectschema/update/:pid', mongoPractice.updateScreenProductById);
 app.patch('/bookings/:id/cancel', mongoPractice.cancelBooking);
-app.delete('/Projectschema/delete/:pid', mongoPractice.deleteScreenProductById); // Ensure this function exists
+app.delete('/Projectschema/delete/:pid', mongoPractice.deleteScreenProductById);
 
 // Schedule schema routes
 app.post('/Scheduleschema/add', mongoPractice.scheduleProduct);
@@ -184,9 +220,8 @@ app.get('/scheduleschema', mongoPractice.getscheduleProducts);
 app.get('/getScheduleschema/:pid', mongoPractice.getScheduleProductById);
 app.get('/Scheduleschema/movie/:pid', mongoPractice.getScheduleProductByMovieName);
 app.patch('/Scheduleschema/update/:pid', mongoPractice.updateScheduleProductById);
-app.delete('/Scheduleschema/delete/:pid', mongoPractice.deleteScheduleProducById); // Ensure this function exists
+app.delete('/Scheduleschema/delete/:pid', mongoPractice.deleteScheduleProducById);
 
-// Start the server
 app.listen(5000, () => {
   console.log('Server is running on port 5000');
 });

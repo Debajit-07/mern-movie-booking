@@ -9,10 +9,6 @@ const connectDB = async () => {
   try {
     await mongoose.connect(
       "mongodb+srv://ghoshdebojit1999:gnKkhAnXzzeogwCO@backend.ut2nn.mongodb.net/?retryWrites=true&w=majority&appName=Backend",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      }
     );
     console.log("Connected to MongoDB.");
   } catch (error) {

@@ -99,143 +99,143 @@ const MovieShowtime = () => {
   };
 
   return (
-<div>
-  <Usernavbar />
-  <div className="movie-showtime-container">
-    {/* Movie Details & Date Picker */}
-    <section className="movie-showtime-header">
-  <h1>{movieName} - {chosenLanguage && `${chosenLanguage}`}</h1>
-  <hr />
-  <div className="showtime-filters">
-    <DatePicker onDateSelect={(date) => setSelectedDate(date)} />
-    
-    {/* Dropdown Filters */}
-    <div className="filters">
-      <div className="dropdown-filter">
-        <label htmlFor="timeFilter">Showtime: </label>
-        <select
-          id="timeFilter"
-          value={timeFilter}
-          onChange={(e) => setTimeFilter(e.target.value)}
-        >
-          <option value="All">All</option>
-          <option value="Morning">Morning</option>
-          <option value="Afternoon">Afternoon</option>
-          <option value="Evening">Evening</option>
-          <option value="Night">Night</option>
-        </select>
-      </div>
+    <div>
+      <Usernavbar />
+      <div className="movie-showtime-container">
+        {/* Movie Details & Date Picker */}
+        <section className="movie-showtime-header">
+          <h1>{movieName} - {chosenLanguage && `${chosenLanguage}`}</h1>
+          <hr />
+          <div className="showtime-filters">
+            <DatePicker onDateSelect={(date) => setSelectedDate(date)} />
 
-      <div className="dropdown-filter">
-        <label htmlFor="priceFilter">Price Range: </label>
-        <select
-          id="priceFilter"
-          value={priceFilter}
-          onChange={(e) => setPriceFilter(e.target.value)}
-        >
-          <option value="All">All</option>
-          <option value="Below200">Below ₹200</option>
-          <option value="200to400">₹200-₹400</option>
-          <option value="Above400">Above ₹400</option>
-        </select>
-      </div>
-    </div>
-  </div>
-</section>
+            {/* Dropdown Filters */}
+            <div className="filters">
+              <div className="dropdown-filter">
+                <label htmlFor="timeFilter">Showtime: </label>
+                <select
+                  id="timeFilter"
+                  value={timeFilter}
+                  onChange={(e) => setTimeFilter(e.target.value)}
+                >
+                  <option value="All">All</option>
+                  <option value="Morning">Morning</option>
+                  <option value="Afternoon">Afternoon</option>
+                  <option value="Evening">Evening</option>
+                  <option value="Night">Night</option>
+                </select>
+              </div>
 
-    {/* Showtimes Listing */}
-    {schedules.length > 0 ? (
-      schedules.map((schedule) => (
-        <div key={schedule._id} className="schedule-card">
-          {schedule.hallName?.map((hall, hallIndex) => {
-            const hallShowData = schedule.showTime?.[hallIndex];
-            let showObj = Array.isArray(hallShowData) && hallShowData.length > 0 
-              ? hallShowData[0] 
-              : hallShowData || null;
+              <div className="dropdown-filter">
+                <label htmlFor="priceFilter">Price Range: </label>
+                <select
+                  id="priceFilter"
+                  value={priceFilter}
+                  onChange={(e) => setPriceFilter(e.target.value)}
+                >
+                  <option value="All">All</option>
+                  <option value="Below200">Below ₹200</option>
+                  <option value="200to400">₹200-₹400</option>
+                  <option value="Above400">Above ₹400</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </section>
 
-            // Skip rendering if no valid showtimes
-            if (!showObj?.time) {
-              return (
-                <div key={hallIndex} className="hall-schedule">
-                  <h2>{hall}</h2>
-                  <div className="showtime-list">
-                    <span>No showtimes available</span>
-                  </div>
-                </div>
-              );
-            }
-            
+        {/* Showtimes Listing */}
+        {schedules.length > 0 ? (
+          schedules.map((schedule) => (
+            <div key={schedule._id} className="schedule-card">
+              {schedule.hallName?.map((hall, hallIndex) => {
+                const hallShowData = schedule.showTime?.[hallIndex];
+                let showObj = Array.isArray(hallShowData) && hallShowData.length > 0
+                  ? hallShowData[0]
+                  : hallShowData || null;
 
-            // Filter prices based on user selection
-            if (
-              !priceMatchesFilter({
-                GoldTicketPrice: showObj.GoldTicketPrice,
-                SilverTicketPrice: showObj.SilverTicketPrice,
-                PlatinumTicketPrice: showObj.PlatinumTicketPrice,
-              })
-            ) {
-              return null;
-            }
+                // Skip rendering if no valid showtimes
+                if (!showObj?.time) {
+                  return (
+                    <div key={hallIndex} className="hall-schedule">
+                      <h2>{hall}</h2>
+                      <div className="showtime-list">
+                        <span>No showtimes available</span>
+                      </div>
+                    </div>
+                  );
+                }
 
-            // Convert showtimes into an array
-            const timesArray = Array.isArray(showObj.time) ? showObj.time : [showObj.time];
 
-            // Filter times based on morning/afternoon/evening/night
-            const filteredTimes =
-              timeFilter === "All"
-                ? timesArray
-                : timesArray.filter((timeStr) => getTimePeriod(timeStr) === timeFilter);
+                // Filter prices based on user selection
+                if (
+                  !priceMatchesFilter({
+                    GoldTicketPrice: showObj.GoldTicketPrice,
+                    SilverTicketPrice: showObj.SilverTicketPrice,
+                    PlatinumTicketPrice: showObj.PlatinumTicketPrice,
+                  })
+                ) {
+                  return null;
+                }
 
-            // Skip if no times match filter
-            if (filteredTimes.length === 0) {
-              return null;
-            }
-            
-            return (
-              <div key={hallIndex} className="hall-schedule">
-                {/* Flex container to keep Hall name & showtimes in one row */}
-                  <div className="hall-header">
-                    <h2 className="hall-name">{hall}</h2>
-                    <div className="showtime-list">
-                      {filteredTimes.map((timeStr, timeIndex) => (
-                        <button
-                          key={timeIndex}
-                          className="showtime-button"
-                          onClick={() =>
-                            handleShowtimeClick(hall, timeStr, {
-                              GoldTicketPrice: showObj.GoldTicketPrice,
-                              SilverTicketPrice: showObj.SilverTicketPrice,
-                              PlatinumTicketPrice: showObj.PlatinumTicketPrice,
-                            })
-                          }
-                        >
-                          {formatTime(timeStr)}
-                          {/* Tooltip */}
-                          <span className="tooltip">
-                            <div><strong>Recliner:</strong> ₹{showObj.GoldTicketPrice}</div>
-                            <div><strong>Royal:</strong> ₹{showObj.SilverTicketPrice}</div>
-                            <div><strong>Club:</strong> ₹{showObj.PlatinumTicketPrice}</div>
-                          </span>
-                        </button>
-                      ))}
+                // Convert showtimes into an array
+                const timesArray = Array.isArray(showObj.time) ? showObj.time : [showObj.time];
+
+                // Filter times based on morning/afternoon/evening/night
+                const filteredTimes =
+                  timeFilter === "All"
+                    ? timesArray
+                    : timesArray.filter((timeStr) => getTimePeriod(timeStr) === timeFilter);
+
+                // Skip if no times match filter
+                if (filteredTimes.length === 0) {
+                  return null;
+                }
+
+                return (
+                  <div key={hallIndex} className="hall-schedule">
+                    {/* Flex container to keep Hall name & showtimes in one row */}
+                    <div className="hall-header">
+                      <h2 className="hall-name">{hall}</h2>
+                      <div className="showtime-list">
+                        {filteredTimes.map((timeStr, timeIndex) => (
+                          <button
+                            key={timeIndex}
+                            className="showtime-button"
+                            onClick={() =>
+                              handleShowtimeClick(hall, timeStr, {
+                                GoldTicketPrice: showObj.GoldTicketPrice,
+                                SilverTicketPrice: showObj.SilverTicketPrice,
+                                PlatinumTicketPrice: showObj.PlatinumTicketPrice,
+                              })
+                            }
+                          >
+                            {formatTime(timeStr)}
+                            {/* Tooltip */}
+                            <span className="tooltip">
+                              <div><strong>Recliner:</strong> ₹{showObj.GoldTicketPrice}<div><strong className="available">Available</strong></div></div>
+                              <div><strong>Royal:</strong> ₹{showObj.SilverTicketPrice}<div><strong className="available">Available</strong></div></div>
+                              <div><strong>Club:</strong> ₹{showObj.PlatinumTicketPrice}<div><strong className="available">Available</strong></div></div>
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Cancellation info */}
+                    <div className="cancellation-info">
+                      <span className="bullet"></span>
+                      Cancellation Available
                     </div>
                   </div>
-
-                  {/* Cancellation info */}
-                  <div className="cancellation-info">
-                    <span className="bullet"></span>
-                    Cancellation Available
-                  </div>
-                  </div>
-            );
-          })}
-        </div>
-      ))
-    ) : (
-      <p>No showtimes available for this movie.</p>
-    )}
-  </div>
-</div>
+                );
+              })}
+            </div>
+          ))
+        ) : (
+          <p>No showtimes available for this movie.</p>
+        )}
+      </div>
+    </div>
 
   );
 };

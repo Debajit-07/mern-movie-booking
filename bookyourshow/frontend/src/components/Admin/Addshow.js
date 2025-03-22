@@ -187,7 +187,7 @@ const Addshow = () => {
                   <input
                     type="number"
                     className="form-control_Show"
-                    placeholder="Enter Gold Ticket Price"
+                    placeholder="Enter Recliner Ticket Price"
                     value={hallPricing[hall]?.GoldTicketPrice || ""}
                     onChange={(e) => updatePricing(hall, "GoldTicketPrice", e.target.value)}
                   />
@@ -197,7 +197,7 @@ const Addshow = () => {
                   <input
                     type="number"
                     className="form-control_Show"
-                    placeholder="Enter Silver Ticket Price"
+                    placeholder="Enter Royal Ticket Price"
                     value={hallPricing[hall]?.SilverTicketPrice || ""}
                     onChange={(e) => updatePricing(hall, "SilverTicketPrice", e.target.value)}
                   />
@@ -207,7 +207,7 @@ const Addshow = () => {
                   <input
                     type="number"
                     className="form-control_Show"
-                    placeholder="Enter Platinum Ticket Price"
+                    placeholder="Enter Club Ticket Price"
                     value={hallPricing[hall]?.PlatinumTicketPrice || ""}
                     onChange={(e) => updatePricing(hall, "PlatinumTicketPrice", e.target.value)}
                   />

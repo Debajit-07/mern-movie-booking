@@ -5,7 +5,8 @@ const uniqueValidator = require('mongoose-unique-validator');
 // Create the Movie schema
 const movie = new mongoose.Schema({
   movieName: { type: String, required: true },
-  img: { data: Buffer, contentType: String },
+  // Removed the binary image storage since we now use a URL for the image
+  // img: { data: Buffer, contentType: String },
   image: { type: String },
   movieGenre: { type: String, required: true },
   movieLanguage: { type: String, required: true },
@@ -41,4 +42,4 @@ const movie = new mongoose.Schema({
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
 movie.plugin(uniqueValidator);
-module.exports = mongoose.model('movieschema', movie);
+module.exports = mongoose.models.movieschema || mongoose.model('movieschema', movie);

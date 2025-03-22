@@ -3,12 +3,11 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../Home/Moviedetails.css"; // Ensure the path is correct
 import Usernavbar from "./Usernavbar";
-import { FaFilm } from "react-icons/fa";
-import { FaStar } from "react-icons/fa";
+import { FaFilm, FaStar } from "react-icons/fa";
 
 function Moviedetails() {
-  // States for movie details
-  const [movieImage, setMovieImage] = useState("");
+  // Movie detail states
+  const [movieImage, setMovieImage] = useState("");  // Poster image URL
   const [movieName, setMovieName] = useState("");
   const [movieGenre, setMovieGenre] = useState("");
   const [movieLanguage, setMovieLanguage] = useState("");
@@ -19,21 +18,20 @@ function Moviedetails() {
   const [trailerLink, setTrailerLink] = useState("");
   const [id, setId] = useState("");
 
-  // Reviews state (per movie)
+  // Reviews
   const [reviews, setReviews] = useState([]);
 
-  // Popup state for language selection
+  // Popups
   const [showLanguagePopup, setShowLanguagePopup] = useState(false);
-
-  // State for review modal and review form fields
   const [showReviewModal, setShowReviewModal] = useState(false);
+
+  // Review form fields
   const [reviewerName, setReviewerName] = useState("");
   const [reviewRating, setReviewRating] = useState("");
   const [reviewText, setReviewText] = useState("");
 
   const navigate = useNavigate();
   const reviewsSliderRef = useRef(null);
-  // "right" = arrow on right side (default), "left" = arrow on left side
   const [arrowPosition, setArrowPosition] = useState("right");
 
   // Scroll to top on mount
@@ -42,9 +40,8 @@ function Moviedetails() {
   }, []);
 
   /**
-   * Fetch movie details and reviews from the server.
-   * If reviews are empty, fall back to the reviews saved in localStorage
-   * using a key that is specific to the movie.
+   * Fetch movie details by ID from server.
+   * If reviews are empty, fallback to localStorage.
    */
   const fetchData = async (movieId) => {
     const localKey = "moviereviews_" + movieId;
@@ -57,7 +54,7 @@ function Moviedetails() {
         movieFormat,
         movieDuration,
         movieDescription,
-        imageURL,
+        imageURL,       // Full poster URL returned from the server
         movieCast,
         trailerLink,
         reviews: fetchedReviews,
@@ -93,7 +90,7 @@ function Moviedetails() {
     }
   };
 
-  // On component mount, get movie ID from localStorage then fetch details.
+  // On mount, get movie ID from localStorage then fetch details.
   useEffect(() => {
     const movieId = localStorage.getItem("id");
     if (!movieId) {
@@ -114,7 +111,7 @@ function Moviedetails() {
     setShowLanguagePopup(true);
   };
 
-  // Called when user selects a language
+  // Handle language selection and navigate to showtime page
   const handleLanguageSelect = (chosenLanguage) => {
     const storedEmail = localStorage.getItem("userEmail") || "";
     navigate("/movieShowtime", {
@@ -132,21 +129,15 @@ function Moviedetails() {
     setShowLanguagePopup(false);
   };
 
-  // Convert movieLanguage to an array of languages (if needed)
+  // Split movieLanguage into an array
   const splittedLangs = movieLanguage
     ? movieLanguage.split(/[\/,]/).map((lang) => lang.trim())
     : [];
 
-  /* 
-     SINGLE ARROW SLIDER LOGIC:
-     - on scroll, if at left edge, arrow shows on right ("right").
-     - if at right edge, arrow shows on left ("left").
-     - otherwise, default to "right".
-  */
+  // Single Arrow Slider Logic for Reviews
   const handleScroll = () => {
     if (!reviewsSliderRef.current) return;
     const { scrollLeft, scrollWidth, clientWidth } = reviewsSliderRef.current;
-
     if (scrollLeft <= 10) {
       setArrowPosition("right");
     } else if (scrollLeft + clientWidth >= scrollWidth - 10) {
@@ -160,20 +151,17 @@ function Moviedetails() {
     if (!reviewsSliderRef.current) return;
     const { scrollWidth, clientWidth } = reviewsSliderRef.current;
     if (arrowPosition === "right") {
-      // Scroll to far right
       reviewsSliderRef.current.scrollLeft = scrollWidth;
     } else {
-      // Scroll to far left
       reviewsSliderRef.current.scrollLeft = 0;
     }
   };
 
-  // Handler to open review modal
+  // Review Modal Handlers
   const openReviewModal = () => {
     setShowReviewModal(true);
   };
 
-  // Handler to close review modal
   const closeReviewModal = () => {
     setShowReviewModal(false);
   };
@@ -181,15 +169,11 @@ function Moviedetails() {
   // Handle review submission from the modal
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
-
-    // Basic validation
     if (!reviewRating) {
       alert("Please select a rating.");
       return;
     }
-
     try {
-      // POST the review to the server
       const response = await axios.post(
         `http://localhost:5000/movieview/review/${id}`,
         {
@@ -198,18 +182,14 @@ function Moviedetails() {
           user: reviewerName.trim() || "Anonymous",
         }
       );
-
-      // Update local storage and reviews state
       const localKey = "moviereviews_" + id;
       localStorage.setItem(localKey, JSON.stringify(response.data.reviews));
       setReviews(response.data.reviews);
 
-      // Clear the form fields
+      // Clear form fields and close modal
       setReviewerName("");
       setReviewRating("");
       setReviewText("");
-
-      // Close the modal
       closeReviewModal();
     } catch (error) {
       console.error("Error submitting review:", error);
@@ -265,11 +245,7 @@ function Moviedetails() {
             movieCast.map((actor, index) => (
               <li key={index}>
                 <div className="cast-member">
-                  <img
-                    src={`http://localhost:5000/uploads/${actor.image}`}
-                    alt={actor.name}
-                    className="cast-image"
-                  />
+                  <img src={actor.image} alt={actor.name} className="cast-image" />
                   <p>{actor.name}</p>
                 </div>
               </li>
@@ -294,7 +270,7 @@ function Moviedetails() {
                   <li key={index}>
                     <div className="review-item">
                       <p>
-                        <strong>{item.user || "Anonymous"}</strong> rated it⭐ {item.rating} / 5
+                        <strong>{item.user || "Anonymous"}</strong> rated it ⭐ {item.rating} / 5
                       </p>
                       {item.review && <p>{item.review}</p>}
                     </div>
@@ -335,21 +311,21 @@ function Moviedetails() {
                 />
               </div>
               <div className="custom-rating-container">
-  <FaStar className="rating-star-icon" />
-  <div className="slider-wrapper">
-    <input
-      type="range"
-      min="0"
-      max="10"
-      step="1"
-      value={reviewRating}
-      onChange={(e) => setReviewRating(e.target.value)}
-      className="rating-slider"
-    />
-    <span className="slider-label">SLIDE TO RATE &rarr;</span>
-  </div>
-  <span className="rating-value">{reviewRating}/10</span>
-</div>
+                <FaStar className="rating-star-icon" />
+                <div className="slider-wrapper">
+                  <input
+                    type="range"
+                    min="0"
+                    max="10"
+                    step="1"
+                    value={reviewRating}
+                    onChange={(e) => setReviewRating(e.target.value)}
+                    className="rating-slider"
+                  />
+                  <span className="slider-label">SLIDE TO RATE &rarr;</span>
+                </div>
+                <span className="rating-value">{reviewRating}/10</span>
+              </div>
               <div className="form-group">
                 <label htmlFor="review">Review</label>
                 <textarea
