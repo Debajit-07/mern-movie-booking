@@ -1,0 +1,25 @@
+# Node dependencies
+node_modules/
+
+# Environment files
+.env
+
+# Build files
+build/
+dist/
+
+# Uploaded content
+uploads/
+
+# IDE/editor config
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Optional image/media exclusions if needed
+*.avif
+*.jpeg
+*.jpg
